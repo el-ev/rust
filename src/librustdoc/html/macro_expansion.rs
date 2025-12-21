@@ -1,5 +1,5 @@
 use rustc_ast::visit::{Visitor, walk_crate, walk_expr, walk_item, walk_pat, walk_stmt};
-use rustc_ast::{Crate, Expr, Item, Pat, Stmt};
+use rustc_ast::{Crate, Expr, Item, Pat, PatKind, Stmt};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_span::source_map::SourceMap;
 use rustc_span::{BytePos, Span};
@@ -147,7 +147,7 @@ impl<'ast> Visitor<'ast> for ExpandedCodeVisitor<'ast> {
     }
 
     fn visit_pat(&mut self, pat: &'ast Pat) {
-        if pat.span.from_expansion() {
+        if pat.span.from_expansion() && !matches!(pat.kind, PatKind::Missing) {
             self.handle_new_span(pat.span, || rustc_ast_pretty::pprust::pat_to_string(pat));
         } else {
             walk_pat(self, pat);
